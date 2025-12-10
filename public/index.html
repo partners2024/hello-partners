@@ -243,7 +243,7 @@
 
     <header class="app-header">
         <div class="brand-pill">
-            <span style="font-weight:700;font-size:0.9rem;">Partners AI</span>
+            <span style="font-weight:700;font-size:0.9rem;">Partners</span>
         </div>
     </header>
 
@@ -275,7 +275,7 @@
         <div class="menu-grid" id="menuGrid">
             <div class="grid-item" id="historyButton"><i class="fas fa-history"></i><span>ประวัติ</span></div>
             <div class="grid-item" id="themeButton"><i class="fas fa-adjust"></i><span>ธีม</span></div>
-            <div class="grid-item" id="articleButton"><i class="fas fa-globe"></i><span>Partners</span></div>
+            <div class="grid-item" id="articleButton"><i class="fas fa-globe"></i><span>ซีเกมส์ 2025</span></div>
             <div class="grid-item" id="clearChatButton"><i class="fas fa-trash" style="color:#ff3b30"></i><span>ล้างแชท</span></div>
         </div>
 
@@ -286,12 +286,7 @@
             <div class="grid-item" id="replyBtn"><i class="fas fa-reply"></i><span>ตอบกลับ</span></div>
             <div class="grid-item" id="searchBtn"><i class="fas fa-search"></i><span>ค้นหา</span></div>
         </div>
-<div id="uiMenuBox" class="uiMenu">
-    <button onclick="sendQuick('ตารางแข่งซีเกมส์วันนี้')">ตารางแข่ง</button>
-    <button onclick="sendQuick('ราคาทองวันนี้')">ราคาทอง</button>
-    <button onclick="sendQuick('ช่วยแนะนำหน่อย')">ถาม AI</button>
-    <button onclick="hideMainMenu()">ปิด</button>
-</div>
+
         <div class="input-wrapper">
             <button class="action-btn" id="menuButton"><i class="fas fa-bars"></i></button>
             <input type="text" id="messageInput" placeholder="พิมพ์ข้อความ..." autocomplete="off">
@@ -572,7 +567,7 @@ if (responseText.startsWith("[SEARCH_RESULTS]")) {
              openModal(els.modals.history);
         };
         
-        getEl('articleButton').onclick = () => openWebPanel('https://www.google.com/search?q=pppppppp&igu=1&ctxs=2&sxsrf=AE3TifOHvDnV3Oa3M9AQi9AuKOQ__k588A%3A1765292428919&udm=50&fbs=AIIjpHwddnRuQwBQAoDsj65ELSF9yGu060Z-lkCw7g1ls5fw2O_ps2fUc9o1ak7M1c47jft4Y00BQlFbRUGbccoThZEmRL5V_bpxDF8a-iz--7RMRknC7FrP4B6SFf1Wfo4iOX-_LRH6tATEpV7UBnjuM6Eo_HGZCViblcBm-3dEQyajOv2lvq4PmJkmJjvphKWPLC8Sq__aXxQCYlXw-01XnKpzq3RoWhjuWlK3dGu1DwKcXvhSmXpdHxq6VhvPcs71yXXxXhg8gTozIuTsF04VZU0r_oZN6DnP9odQU51OVwLYhd8TsjAwYRCBiR_uvoATKb_cOI2p&aep=1&ntc=1&sa=X&ved=2ahUKEwjn5pnh4rCRAxVYla8BHW05MdoQ2J8OegQIDhAE&biw=411&bih=711&dpr=1.75&mstk=AUtExfAfz6C8DNpa9RiWdt9drdAf7iPRYyNOAlo5KEQGdXvUWmhchh6tXhM67JGDmBRNpdbqFVQsMW8IBY1OsDOs6oWZeRYLIJ0l90c7RqTYyUNp32Z47XjF0AYNkOgQontzyiZN72DbTVAKpGv_N43jNObVeV-NokZGWUPAv3zmIjs-YYgMzL8UipdhuLt3vPFVZLrDvWkrp8_lN9kItrf2FPEa5dlHy_Aw6Loks5ZCYIfmHT4l0zeqBtbIMqKDZIfjyDRY9YmyKQ1wtIlfJFRNPEROw9rLB-6bbn0LQMspL2EZD0ESjsHgm16zi5lg5doC9Bvq2Qi3iT-j2dmB3g9FEagKdILBGPIxIA&csuir=1&mtid=kTk4aaf4KNS64-EPiMqC2Qc&fbclid=IwY2xjawOmXrJleHRuA2FlbQIxMQBzcnRjBmFwcF9pZAwzNTA2ODU1MzE3MjgAAR46uzbOqMT3qZtl34iFLFwuDbsimCT8ycKCcMHOJ7JVeQXDtwJEfNJG5SARNA_aem_qpivVRV9PEQwM3pRH4FN3g&sei=Y385aeCJIKLM1e8Pl--N0AE');
+        getEl('articleButton').onclick = () => openWebPanel('https://www.google.com/search?q=ตารางการแข่งขันซีเกมส์วันนี้ และ อัพเดทข่าวสารล่าสุดที่น่าสนใจ&igu=1&ctxs=2&sxsrf=AE3TifOHvDnV3Oa3M9AQi9AuKOQ__k588A%3A1765292428919&udm=50&fbs=AIIjpHwddnRuQwBQAoDsj65ELSF9yGu060Z-lkCw7g1ls5fw2O_ps2fUc9o1ak7M1c47jft4Y00BQlFbRUGbccoThZEmRL5V_bpxDF8a-iz--7RMRknC7FrP4B6SFf1Wfo4iOX-_LRH6tATEpV7UBnjuM6Eo_HGZCViblcBm-3dEQyajOv2lvq4PmJkmJjvphKWPLC8Sq__aXxQCYlXw-01XnKpzq3RoWhjuWlK3dGu1DwKcXvhSmXpdHxq6VhvPcs71yXXxXhg8gTozIuTsF04VZU0r_oZN6DnP9odQU51OVwLYhd8TsjAwYRCBiR_uvoATKb_cOI2p&aep=1&ntc=1&sa=X&ved=2ahUKEwjn5pnh4rCRAxVYla8BHW05MdoQ2J8OegQIDhAE&biw=411&bih=711&dpr=1.75&mstk=AUtExfAfz6C8DNpa9RiWdt9drdAf7iPRYyNOAlo5KEQGdXvUWmhchh6tXhM67JGDmBRNpdbqFVQsMW8IBY1OsDOs6oWZeRYLIJ0l90c7RqTYyUNp32Z47XjF0AYNkOgQontzyiZN72DbTVAKpGv_N43jNObVeV-NokZGWUPAv3zmIjs-YYgMzL8UipdhuLt3vPFVZLrDvWkrp8_lN9kItrf2FPEa5dlHy_Aw6Loks5ZCYIfmHT4l0zeqBtbIMqKDZIfjyDRY9YmyKQ1wtIlfJFRNPEROw9rLB-6bbn0LQMspL2EZD0ESjsHgm16zi5lg5doC9Bvq2Qi3iT-j2dmB3g9FEagKdILBGPIxIA&csuir=1&mtid=kTk4aaf4KNS64-EPiMqC2Qc&fbclid=IwY2xjawOmXrJleHRuA2FlbQIxMQBzcnRjBmFwcF9pZAwzNTA2ODU1MzE3MjgAAR46uzbOqMT3qZtl34iFLFwuDbsimCT8ycKCcMHOJ7JVeQXDtwJEfNJG5SARNA_aem_qpivVRV9PEQwM3pRH4FN3g&sei=Y385aeCJIKLM1e8Pl--N0AE');
         
         getEl('clearChatButton').onclick = () => {
             if(confirm('ล้างแชททั้งหมด?')) {
@@ -594,6 +589,6 @@ if (responseText.startsWith("[SEARCH_RESULTS]")) {
     });
     </script>
     <script src="search-cards.js"></script>
-     <script src="ui-menu.js"></script>
+    <script src="ui-menu.js"></script>
 </body>
 </html>
