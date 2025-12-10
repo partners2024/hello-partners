@@ -9,7 +9,21 @@
  */
 
 import { Env, ChatMessage } from "./types";
+import { handleProxy } from "./proxy";
 
+export default {
+  async fetch(request: Request): Promise<Response> {
+    const url = new URL(request.url);
+
+    // --- Proxy route ---
+    if (url.pathname === "/proxy") {
+      return handleProxy(request);
+    }
+
+    // --- Chat worker เดิมของหัวแถว ---
+    return new Response("Partners Worker Chat Online", { status: 200 });
+  }
+};
 // Main AI model
 const MODEL_ID = "@cf/meta/llama-3.3-70b-instruct-fp8-fast";
 
