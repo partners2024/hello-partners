@@ -1,84 +1,381 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Proxy Iframe Test</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>จักรวาลและดวงดาว</title>
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
 
-  <style>
     body {
-      margin: 0;
-      padding: 0;
-      background: #0d0d0f;
-      font-family: "Inter", sans-serif;
-      color: #fff;
+        font-family: system-ui, sans-serif;
+        background: #000;
+        color: #fff;
+        overflow: hidden;
+        height: 100vh;
+        width: 100vw;
+        position: relative;
+        background: 
+            radial-gradient(ellipse at 20% 20%, #0c0032 0%, #000000 40%),
+            radial-gradient(ellipse at 80% 80%, #190061 0%, transparent 50%),
+            radial-gradient(ellipse at 40% 60%, #240090 0%, transparent 40%),
+            linear-gradient(135deg, #000000 0%, #0c0032 100%);
     }
 
-    header {
-      padding: 18px 24px;
-      background: #16161a;
-      border-bottom: 1px solid #222;
-      font-size: 18px;
-      font-weight: 600;
+    /* ดวงดาวระยิบระยับ */
+    .stars-container {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 1;
     }
 
-    .input-box {
-      padding: 14px 24px;
-      background: #16161a;
-      border-bottom: 1px solid #222;
-      display: flex;
-      gap: 8px;
+    .star {
+        position: absolute;
+        background-color: white;
+        border-radius: 50%;
+        animation: twinkle 5s infinite;
     }
 
-    input {
-      flex: 1;
-      padding: 10px 14px;
-      border-radius: 8px;
-      border: none;
-      outline: none;
-      background: #222;
-      color: #fff;
+    /* ดาวขนาดต่างๆ */
+    .star.small {
+        width: 1px;
+        height: 1px;
+        opacity: 0.7;
     }
 
-    button {
-      padding: 10px 16px;
-      border-radius: 8px;
-      border: none;
-      background: #4f46e5;
-      color: #fff;
-      font-size: 15px;
-      font-weight: 600;
-      cursor: pointer;
+    .star.medium {
+        width: 2px;
+        height: 2px;
+        opacity: 0.9;
     }
 
-    iframe {
-      width: 100%;
-      height: calc(100vh - 120px);
-      border: none;
+    .star.large {
+        width: 3px;
+        height: 3px;
+        opacity: 1;
+        box-shadow: 0 0 6px rgba(255, 255, 255, 0.8);
     }
-  </style>
+
+    /* ดาวสีต่างๆ */
+    .star.blue {
+        background-color: #a0d2ff;
+        box-shadow: 0 0 4px rgba(160, 210, 255, 0.7);
+    }
+
+    .star.yellow {
+        background-color: #fff9a0;
+        box-shadow: 0 0 4px rgba(255, 249, 160, 0.7);
+    }
+
+    .star.purple {
+        background-color: #d0a0ff;
+        box-shadow: 0 0 4px rgba(208, 160, 255, 0.7);
+    }
+
+    /* ดาวตก */
+    .shooting-star {
+        position: absolute;
+        width: 120px;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, white);
+        transform: rotate(-45deg);
+        opacity: 0;
+        z-index: 2;
+    }
+
+    /* เนบิวลา */
+    .nebula {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(60px);
+        opacity: 0.3;
+        z-index: 0;
+    }
+
+    .nebula.purple {
+        background: radial-gradient(circle, rgba(157, 0, 255, 0.5), transparent 70%);
+        width: 500px;
+        height: 500px;
+        top: 20%;
+        left: 10%;
+    }
+
+    .nebula.blue {
+        background: radial-gradient(circle, rgba(0, 150, 255, 0.4), transparent 70%);
+        width: 600px;
+        height: 600px;
+        bottom: 10%;
+        right: 15%;
+    }
+
+    /* อนิเมชัน */
+    @keyframes twinkle {
+        0%, 100% { opacity: 0.3; }
+        50% { opacity: 1; }
+    }
+
+    @keyframes twinkle-fast {
+        0%, 100% { opacity: 0.4; transform: scale(1); }
+        50% { opacity: 1; transform: scale(1.1); }
+    }
+
+    @keyframes shoot {
+        0% {
+            opacity: 0;
+            transform: rotate(-45deg) translateX(0);
+        }
+        10% {
+            opacity: 1;
+        }
+        90% {
+            opacity: 1;
+        }
+        100% {
+            opacity: 0;
+            transform: rotate(-45deg) translateX(1000px);
+        }
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translate(0, 0) rotate(0deg); }
+        25% { transform: translate(10px, -10px) rotate(1deg); }
+        50% { transform: translate(0, -20px) rotate(0deg); }
+        75% { transform: translate(-10px, -10px) rotate(-1deg); }
+    }
+
+    /* ข้อความกลางหน้าจอ */
+    .title {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        z-index: 3;
+        color: rgba(255, 255, 255, 0.8);
+        text-shadow: 0 0 20px rgba(255, 215, 0, 0.7);
+        font-size: 2.5rem;
+        letter-spacing: 5px;
+        animation: float 20s infinite ease-in-out;
+    }
+
+    .subtitle {
+        font-size: 1.2rem;
+        letter-spacing: 3px;
+        margin-top: 20px;
+        opacity: 0.7;
+    }
+</style>
 </head>
 
 <body>
-  <header>
-    Proxy Iframe Viewer
-  </header>
+    <!-- เนบิวลา -->
+    <div class="nebula purple"></div>
+    <div class="nebula blue"></div>
 
-  <div class="input-box">
-    <input id="urlInput" placeholder="วาง URL ที่ต้องการโหลดผ่าน Proxy เช่น https://www.perplexity.ai/..." />
-    <button onclick="loadIframe()">Open</button>
-  </div>
-
-  <iframe id="viewer" src=""></iframe>
-
-  <script>
-    function loadIframe() {
-      const raw = document.getElementById("urlInput").value.trim();
-      if (!raw) return alert("กรอก URL ก่อนสิหัวแถว");
-
-      const iframeUrl = `/proxy?url=${encodeURIComponent(raw)}`;
-      document.getElementById("viewer").src = iframeUrl;
+    <!-- ดวงดาว -->
+    <div class="stars-container" id="stars-container"></div>
+<script>
+    const starsContainer = document.getElementById('stars-container');
+    
+    // สร้างดวงดาวระยิบระยับ
+    function createStars() {
+        const starCount = 800; // จำนวนดาวทั้งหมด
+        
+        for (let i = 0; i < starCount; i++) {
+            const star = document.createElement('div');
+            star.classList.add('star');
+            
+            // สุ่มขนาดดาว
+            const size = Math.random();
+            if (size < 0.6) {
+                star.classList.add('small');
+            } else if (size < 0.9) {
+                star.classList.add('medium');
+            } else {
+                star.classList.add('large');
+            }
+            
+            // สุ่มสีดาว (ส่วนใหญ่สีขาว, บางดวงสีอื่น)
+            const colorRand = Math.random();
+            if (colorRand < 0.05) {
+                star.classList.add('blue');
+            } else if (colorRand < 0.1) {
+                star.classList.add('yellow');
+            } else if (colorRand < 0.15) {
+                star.classList.add('purple');
+            }
+            
+            // สุ่มตำแหน่ง
+            star.style.left = `${Math.random() * 100}%`;
+            star.style.top = `${Math.random() * 100}%`;
+            
+            // สุ่มความเร็วการกระพริบ
+            const duration = 3 + Math.random() * 7;
+            const delay = Math.random() * 5;
+            star.style.animation = `twinkle ${duration}s infinite ${delay}s`;
+            
+            // สุ่มการกระพริบเร็วสำหรับบางดาว
+            if (Math.random() < 0.2) {
+                star.style.animation = `twinkle-fast ${1 + Math.random() * 2}s infinite ${delay}s`;
+            }
+            
+            starsContainer.appendChild(star);
+        }
     }
-  </script>
+    
+    // สร้างดาวตก
+    function createShootingStar() {
+        const shootingStar = document.createElement('div');
+        shootingStar.classList.add('shooting-star');
+        
+        // สุ่มตำแหน่งเริ่มต้น
+        shootingStar.style.left = `${-100 + Math.random() * 50}px`;
+        shootingStar.style.top = `${Math.random() * 80}%`;
+        
+        // สุ่มความยาว
+        const length = 100 + Math.random() * 150;
+        shootingStar.style.width = `${length}px`;
+        
+        // สุ่มความเร็ว
+        const duration = 1 + Math.random() * 2;
+        
+        // เพิ่มเอฟเฟกต์หาง
+        const tailLength = 30 + Math.random() * 50;
+        shootingStar.style.background = `linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.8) ${tailLength}%, white)`;
+        
+        // อนิเมชัน
+        shootingStar.style.animation = `shoot ${duration}s linear`;
+        
+        document.body.appendChild(shootingStar);
+        
+        // ลบออกหลังจากอนิเมชันเสร็จ
+        setTimeout(() => {
+            if (shootingStar.parentNode) {
+                shootingStar.parentNode.removeChild(shootingStar);
+            }
+        }, duration * 1000);
+    }
+    
+    // สร้างดาวตกเป็นระยะๆ
+    function startShootingStars() {
+        // สร้างดาวตกแรกทันที
+        setTimeout(createShootingStar, 1000);
+        
+        // สร้างดาวตกเป็นระยะๆ
+        setInterval(() => {
+            // สุ่มโอกาสที่จะสร้างดาวตก (30%)
+            if (Math.random() < 0.3) {
+                createShootingStar();
+            }
+        }, 3000);
+    }
+    
+    // สร้างเอฟเฟกต์พาร์ติเคิลสำหรับบางดาว
+    function createParticles() {
+        // สร้างพาร์ติเคิลเฉพาะสำหรับดาวบางดวง
+        const largeStars = document.querySelectorAll('.star.large');
+        
+        largeStars.forEach(star => {
+            // สุ่มสร้างพาร์ติเคิลรอบๆ ดาวใหญ่บางดวง
+            if (Math.random() < 0.3) {
+                const particleCount = 3 + Math.floor(Math.random() * 4);
+                
+                for (let i = 0; i < particleCount; i++) {
+                    const particle = document.createElement('div');
+                    particle.classList.add('star', 'small');
+                    
+                    // ตำแหน่งรอบๆ ดาวหลัก
+                    const angle = Math.random() * Math.PI * 2;
+                    const distance = 5 + Math.random() * 15;
+                    
+                    const starRect = star.getBoundingClientRect();
+                    const centerX = parseFloat(star.style.left) || 0;
+                    const centerY = parseFloat(star.style.top) || 0;
+                    
+                    particle.style.left = `${centerX + Math.cos(angle) * distance / 100}%`;
+                    particle.style.top = `${centerY + Math.sin(angle) * distance / 100}%`;
+                    
+                    // อนิเมชัน
+                    const duration = 4 + Math.random() * 6;
+                    const delay = Math.random() * 3;
+                    particle.style.animation = `twinkle ${duration}s infinite ${delay}s`;
+                    
+                    starsContainer.appendChild(particle);
+                }
+            }
+        });
+    }
+    
+    // เริ่มสร้างทุกอย่างเมื่อหน้าเว็บโหลดเสร็จ
+    window.addEventListener('load', () => {
+        createStars();
+        startShootingStars();
+        
+        // รอให้ดาวสร้างเสร็จก่อนค่อยสร้างพาร์ติเคิล
+        setTimeout(createParticles, 500);
+        
+        // อัพเดทตำแหน่งดาวเมื่อ resize หน้าต่าง
+        window.addEventListener('resize', () => {
+            // ในกรณีนี้เราใช้ % ดังนั้นไม่จำเป็นต้องอัพเดท
+        });
+    });
+    
+    // เพิ่มเอฟเฟกต์เมื่อคลิกที่หน้าจอ
+    document.addEventListener('click', (e) => {
+        // สร้างระเบิดดาวเมื่อคลิก
+        createStarBurst(e.clientX, e.clientY);
+    });
+    
+    function createStarBurst(x, y) {
+        const burstCount = 15;
+        
+        for (let i = 0; i < burstCount; i++) {
+            const burstStar = document.createElement('div');
+            burstStar.classList.add('star', 'medium');
+            
+            // ตั้งค่าเริ่มต้น
+            burstStar.style.position = 'fixed';
+            burstStar.style.left = `${x}px`;
+            burstStar.style.top = `${y}px`;
+            burstStar.style.opacity = '1';
+            burstStar.style.zIndex = '10';
+            burstStar.style.transition = 'all 0.8s ease-out';
+            
+            // สุ่มสี
+            const colors = ['white', '#a0d2ff', '#fff9a0', '#d0a0ff'];
+            burstStar.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            
+            document.body.appendChild(burstStar);
+            
+            // สุ่มทิศทางและระยะทาง
+            const angle = Math.random() * Math.PI * 2;
+            const distance = 50 + Math.random() * 150;
+            const targetX = x + Math.cos(angle) * distance;
+            const targetY = y + Math.sin(angle) * distance;
+            
+            // ย้ายดาว
+            setTimeout(() => {
+                burstStar.style.left = `${targetX}px`;
+                burstStar.style.top = `${targetY}px`;
+                burstStar.style.opacity = '0';
+            }, 10);
+            
+            // ลบออกหลังจากอนิเมชันเสร็จ
+            setTimeout(() => {
+                if (burstStar.parentNode) {
+                    burstStar.parentNode.removeChild(burstStar);
+                }
+            }, 1000);
+        }
+    }
+</script>
 </body>
 </html>
