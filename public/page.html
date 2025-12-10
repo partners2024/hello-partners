@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Proxy Iframe Test</title>
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: #0d0d0f;
+      font-family: "Inter", sans-serif;
+      color: #fff;
+    }
+
+    header {
+      padding: 18px 24px;
+      background: #16161a;
+      border-bottom: 1px solid #222;
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .input-box {
+      padding: 14px 24px;
+      background: #16161a;
+      border-bottom: 1px solid #222;
+      display: flex;
+      gap: 8px;
+    }
+
+    input {
+      flex: 1;
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: none;
+      outline: none;
+      background: #222;
+      color: #fff;
+    }
+
+    button {
+      padding: 10px 16px;
+      border-radius: 8px;
+      border: none;
+      background: #4f46e5;
+      color: #fff;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    iframe {
+      width: 100%;
+      height: calc(100vh - 120px);
+      border: none;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    Proxy Iframe Viewer
+  </header>
+
+  <div class="input-box">
+    <input id="urlInput" placeholder="วาง URL ที่ต้องการโหลดผ่าน Proxy เช่น https://www.perplexity.ai/..." />
+    <button onclick="loadIframe()">Open</button>
+  </div>
+
+  <iframe id="viewer" src=""></iframe>
+
+  <script>
+    function loadIframe() {
+      const raw = document.getElementById("urlInput").value.trim();
+      if (!raw) return alert("กรอก URL ก่อนสิหัวแถว");
+
+      const iframeUrl = `/proxy?url=${encodeURIComponent(raw)}`;
+      document.getElementById("viewer").src = iframeUrl;
+    }
+  </script>
+</body>
+</html>
