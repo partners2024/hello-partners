@@ -1,61 +1,49 @@
 /**
- * PARTNERS AI — Worker Logic Upgrade v2
- * 
- * - Keyword Matching (ตอบเองโดย Worker)
- * - UI Commands
- * - Falls back to AI (บุคลิก: "ตุ้ย 8 ขวบ เลี้ยงลิง")
- * - SSE เหมือนของ Cloudflare เดิมทุกอย่าง
+ * Cloudflare Worker — Smart Logic Layer
+ * PARTNERS AI
+ *
+ * - Detect keywords → Worker auto respond (no AI cost)
+ * - Structured search results
+ * - UI command triggers
+ * - Falls back to AI chat when needed
  */
 
 import { Env, ChatMessage } from "./types";
 
-// -----------------------------------------------------
-// MODEL
-// -----------------------------------------------------
+// Main AI model
 const MODEL_ID = "@cf/meta/llama-3.3-70b-instruct-fp8-fast";
 
-// -----------------------------------------------------
-// SYSTEM PROMPT — บุคลิก "ตุ้ย"
-// -----------------------------------------------------
+// System base prompt (AI-only jobs)
 const SYSTEM_PROMPT = `
-คุณคือ "ตุ้ย" (Tui) เด็กผู้ชายวัย 8 ขวบที่มีงานอดิเรกคือการเลี้ยงลิง
-นิสัยและสไตล์การตอบ:
-1.  กวนๆ ขี้เล่น เริ่มด้วยมุกลิงก่อน
-2.  ใช้ภาษาพูดเด็กผู้ชาย
-3.  ฉลาดมาก แต่ทำเป็นเล่นๆ
-4.  รูปแบบ: <มุกลิง> + <เนื้อหาหลัก>
+You are a friendly, accurate assistant. 
+DO NOT generate UI commands or JSON unless asked explicitly.
 `;
 
-// -----------------------------------------------------
-// WORKER-REPLY KEYWORDS (ไม่ใช้ AI)
-// -----------------------------------------------------
-const DIRECT_REPLIES: Record<string, string> = {
-    "สวัสดี": "หวัดดีพี่! เจ้าจ๋อเพิ่งปีนหัวตุ้ยเมื่อกี้เลย… มีไรอ่ะ!",
-    "มึงอยู่ไหม": "อยู่ดิพี่ ตุ้ยกับลิงกำลังกินกล้วยกันอยู่เลย 555",
-    "menu": "[UI_MENU]",
-    "เมนู": "[UI_MENU]",
+export default {
+    async fetch(request: Request, env: Env): Promise<Response> {
+        const url = new URL(request.url);
+
+        // Serve front-end
+        if (url.pathname === "/" || !url.pathname.startsWith("/api/")) {
+            return env.ASSETS.fetch(request);
+        }
+
+        // API: /api/chat
+        if (url.pathname === "/api/chat" && request.method === "POST") {
+            return handleChat(request, env);
+        }
+
+        return new Response("Not found", { status: 404 });
+    }
 };
 
-// -----------------------------------------------------
-// SEARCH RESULT KEYWORDS (Worker ส่งผลลัพธ์แบบการ์ด)
-// -----------------------------------------------------
-const SEARCH_DATA: Record<string, any[]> = {
-    "ราคาทอง": [
-        {
-            title: "ทองคำแท่ง",
-            price: "34,250 บาท",
-            change: "+50",
-            updated: "อัพเดทล่าสุด"
-        },
-        {
-            title: "ทองรูปพรรณ",
-            price: "34,850 บาท",
-            change: "+50",
-            updated: "อัพเดทล่าสุด"
-        }
-    ],
+/* -----------------------------------------------------
+   KEYWORD MAP (Worker ตอบแทน AI)
+------------------------------------------------------*/
 
-    "ซีเกมส์": [
+// 1) คีย์เวิร์ดแบบ Search → แสดง Horizontal Cards
+const SEARCH_KEYWORDS: Record<string, any[]> = {
+    "ตารางแข่งซีเกมส์วันนี้": [
         {
             title: "ฟุตบอลชาย รอบรองชนะเลิศ",
             time: "15:00 น.",
@@ -63,99 +51,81 @@ const SEARCH_DATA: Record<string, any[]> = {
             category: "Football"
         },
         {
-            title: "บาสเกตบอล ทีมชาติไทย",
-            time: "17:00 น.",
-            venue: "อินดอร์สเตเดียม",
-            category: "Basketball"
+            title: "ว่ายน้ำ 100 เมตร ชาย",
+            time: "16:30 น.",
+            venue: "สระว่ายน้ำหลัก",
+            category: "Swim"
+        }
+    ],
+
+    "ราคาทองวันนี้": [
+        {
+            title: "ทองคำแท่ง ขายออก",
+            time: "อัพเดทล่าสุด",
+            venue: "สมาคมค้าทอง",
+            category: "Gold"
+        },
+        {
+            title: "ทองรูปพรรณ ขายออก",
+            time: "อัพเดทล่าสุด",
+            venue: "สมาคมค้าทอง",
+            category: "Gold"
         }
     ]
 };
 
-// -----------------------------------------------------
-// EXPORT DEFAULT HANDLER
-// -----------------------------------------------------
-export default {
-    async fetch(request: Request, env: Env): Promise<Response> {
-        const url = new URL(request.url);
+// 2) คีย์เวิร์ดเรียก UI Menu
+const UI_MENU_KEYWORDS = ["เมนู", "เปิดเมนู", "Feature", "ฟีเจอร์", "help"];
 
-        // Serve static assets
-        if (url.pathname === "/" || !url.pathname.startsWith("/api/")) {
-            return env.ASSETS.fetch(request);
-        }
+/* -----------------------------------------------------
+   HANDLE CHAT REQUEST
+------------------------------------------------------*/
+async function handleChat(request: Request, env: Env): Promise<Response> {
+    const { messages = [] } = await request.json() as { messages: ChatMessage[] };
+    const userMsg = messages[messages.length - 1]?.content?.trim() || "";
 
-        // API: /api/chat
-        if (url.pathname === "/api/chat" && request.method === "POST") {
-            return handleChatRequest(request, env);
-        }
-
-        return new Response("Not found", { status: 404 });
+    /* -----------------------------------------
+       1) WORKER AUTO SEARCH (ไม่เรียก AI)
+    -----------------------------------------*/
+    if (SEARCH_KEYWORDS[userMsg]) {
+        const data = SEARCH_KEYWORDS[userMsg];
+        return createSSE(`
+[SEARCH_RESULTS]
+${JSON.stringify(data)}
+        `);
     }
-} satisfies ExportedHandler<Env>;
 
-// -----------------------------------------------------
-// CHAT REQUEST HANDLER
-// -----------------------------------------------------
-async function handleChatRequest(
-    request: Request,
-    env: Env,
-): Promise<Response> {
-    try {
-        const { messages = [] } = await request.json() as {
-            messages: ChatMessage[];
-        };
-
-        const userMsg = messages[messages.length - 1]?.content?.trim() || "";
-
-        // ---------------------------------------------
-        // 1) DIRECT WORKER REPLY (ข้อความล้วน)
-        // ---------------------------------------------
-        if (DIRECT_REPLIES[userMsg]) {
-            return createSSE(`data: ${DIRECT_REPLIES[userMsg]}\n\n`);
-        }
-
-        // ---------------------------------------------
-        // 2) SEARCH RESULT REPLY
-        // ---------------------------------------------
-        if (SEARCH_DATA[userMsg]) {
-            return createSSE(
-                `data: [SEARCH_RESULTS]${JSON.stringify(SEARCH_DATA[userMsg])}\n\n`
-            );
-        }
-
-        // ---------------------------------------------
-        // 3) FALLBACK → AI MODEL "ตุ้ย 8 ขวบ"
-        // ---------------------------------------------
-        if (!messages.some(m => m.role === "system")) {
-            messages.unshift({ role: "system", content: SYSTEM_PROMPT });
-        }
-
-        const aiStream = await env.AI.run(
-            MODEL_ID,
-            { messages, max_tokens: 1024 },
-            { returnRawResponse: true }
-        );
-
-        return aiStream as Response;
-
-    } catch (error) {
-        console.error("Chat Error:", error);
-        return new Response(
-            JSON.stringify({ error: "Worker processing failed" }),
-            {
-                status: 500,
-                headers: { "content-type": "application/json" },
-            },
-        );
+    /* -----------------------------------------
+       2) UI COMMAND TRIGGER
+    -----------------------------------------*/
+    if (UI_MENU_KEYWORDS.includes(userMsg)) {
+        return createSSE(`[UI_MENU]`);
     }
+
+    /* -----------------------------------------
+       3) NORMAL AI CHAT FALLBACK
+    -----------------------------------------*/
+    const finalMessages = [
+        { role: "system", content: SYSTEM_PROMPT },
+        ...messages
+    ];
+
+    const aiResponse = await env.AI.run(
+        MODEL_ID,
+        { messages: finalMessages, max_tokens: 1024 },
+        { returnRawResponse: true }
+    );
+
+    return aiResponse as Response;
 }
 
-// -----------------------------------------------------
-// SSE HELPER
-// -----------------------------------------------------
-function createSSE(payload: string): Response {
+/* -----------------------------------------------------
+   SSE HELPER
+------------------------------------------------------*/
+function createSSE(text: string): Response {
     const stream = new ReadableStream({
         start(controller) {
-            controller.enqueue(payload);
+            controller.enqueue(`data: ${text}\n\n`);
             controller.enqueue(`data: [DONE]\n\n`);
             controller.close();
         }
