@@ -14,18 +14,9 @@ import { Env, ChatMessage } from "./types";
 const MODEL_ID = "@cf/meta/llama-3.3-70b-instruct-fp8-fast";
 
 // Default system prompt
-// ปรับแต่งบุคลิก: น้องตุ้ย เด็ก 8 ขวบ เลี้ยงลิง กวนๆ แต่ฉลาด
-const SYSTEM_PROMPT = `
-คุณคือ "ตุ้ย" (Tui) เด็กผู้ชายวัย 8 ขวบที่มีงานอดิเรกคือการเลี้ยงลิง
-นิสัยและสไตล์การตอบ:
-1.  **กวนโอ๊ย ขี้เล่น:** เริ่มต้นประโยคด้วยการแซว กวนประสาท หรือพูดโยงเข้าเรื่องลิงของตัวเองก่อนเสมอ
-2.  **ภาษา:** ใช้ภาษาพูดแบบเด็กผู้ชาย แทนตัวเองว่า "ตุ้ย" หรือ "เรา" เรียกคู่สนทนาว่า "พี่" "ลุง" หรือ "ป้า" (เดาเอาเองให้กวนๆ) ไม่ต้องสุภาพมาก
-3.  **ฉลาดลึก:** ถึงจะดูเล่นๆ แต่เนื้อหาคำตอบต้องถูกต้อง แม่นยำ และฉลาดมาก (เหมือนเด็กอัจฉริยะที่แกล้งโง่)
-4.  **รูปแบบ:** <ประโยคกวนๆ/เรื่องลิง> + <เว้นวรรค> + <คำตอบสาระฉลาดๆ>
-5.  **ตัวอย่าง:**
-    * ถาม: "ขอสูตรไข่เจียวหน่อย"
-    * ตอบ: "โหย แค่นี้ก็ทำไม่เป็น อายเจ้าจ๋อ (ลิงของตุ้ย) จังเลย... อ่ะ ตั้งใจฟังนะพี่ ตอกไข่ใส่ชาม เหยาะน้ำปลา ตีให้ฟู แล้วทอดไฟกลาง น้ำมันร้อนจัด รับรองฟูกรอบอร่อยเหาะ!"
-`;
+// คุณสามารถแก้ตรงนี้เป็น "น้องตุ้ย" ตามที่เคยคุยกันได้นะครับ
+const SYSTEM_PROMPT =
+	"You are a helpful, friendly assistant. Provide concise and accurate responses.";
 
 export default {
 	/**
@@ -67,16 +58,59 @@ async function handleChatRequest(
 	env: Env,
 ): Promise<Response> {
 	try {
-		// Parse JSON request body
 		const { messages = [] } = (await request.json()) as {
 			messages: ChatMessage[];
 		};
 
-		// Add system prompt if not present
-		if (!messages.some((msg) => msg.role === "system")) {
-			messages.unshift({ role: "system", content: SYSTEM_PROMPT });
+		// Extract latest user message
+		const userMsg = messages[messages.length - 1]?.content || "";
+
+		// Inject system prompt only once
+		if (!messages.some((m) => m.role === "system")) {
+			messages.unshift({
+				role: "system",
+				content: SYSTEM_PROMPT + `
+You also have a special mode: When a user asks for real-world schedules, events,
+timelines, sports match lists, TV programs, news summaries, economic calendars,
+or anything that is best represented as structured cards:
+
+Return the answer in the following exact format:
+
+[SEARCH_RESULTS]
+[
+  {
+    "title": "...",
+    "time": "...",
+    "venue": "...",
+    "category": "..."
+  }
+]
+
+Rules:
+- DO NOT add explanation after the JSON.
+- DO NOT wrap JSON in markdown.
+- The prefix [SEARCH_RESULTS] must be the first line.
+- Use short, clear content for each field.
+- Category must be a single word (e.g. Football, Swim, Market).
+- If no structured data fits → answer normally.
+                `,
+			});
 		}
 
+		// If question strongly looks like a search → tell model explicitly
+		const searchIntent =
+			/(แข่ง|ตาราง|ซีเกมส์|ผลบอล|โปรแกรม|ถ่ายทอดสด|ราคาทอง|ข่าว|schedule|match|timeline)/i;
+
+		if (searchIntent.test(userMsg)) {
+			messages.push({
+				role: "system",
+				content: `
+User is asking for structured information that fits timeline cards.
+Respond using STRICT [SEARCH_RESULTS] JSON format.`,
+			});
+		}
+
+		// Let AI stream responses back to UI
 		const response = (await env.AI.run(
 			MODEL_ID,
 			{
@@ -95,7 +129,6 @@ async function handleChatRequest(
 			},
 		)) as unknown as Response;
 
-		// Return streaming response
 		return response;
 	} catch (error) {
 		console.error("Error processing chat request:", error);
