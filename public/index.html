@@ -1,290 +1,580 @@
-<!doctype html>
-<html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-		<title>Partners Chat</title>
-		<style>
-			:root {
-				/* สีหลักเปลี่ยนเป็นโทนฟ้า-น้ำเงิน แบบ Messenger/iMessage หรือปรับตามชอบ */
-				--primary-color: #007AFF; 
-				--primary-gradient: linear-gradient(135deg, #007AFF, #0056b3);
-				--bg-color: #f0f2f5;
-				--chat-bg: #ffffff;
-				--text-color: #050505;
-				--text-secondary: #65676b;
-				--user-msg-bg: #007AFF;
-				--user-msg-text: #ffffff;
-				--assistant-msg-bg: #e4e6eb;
-				--assistant-msg-text: #050505;
-				--input-bg: #f0f2f5;
-				--shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.1);
-				--shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
-			}
+<!DOCTYPE html>
+<html lang="th" data-theme="dark">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Pernartd™ | Intelligent Partner</title> 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
+    <meta name="theme-color" content="#050505"/>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
 
-			* {
-				box-sizing: border-box;
-				margin: 0;
-				padding: 0;
-				-webkit-tap-highlight-color: transparent;
-			}
+    <style>
+        /* =========================================
+           STYLE ENGINE: NEURAL FLUIDITY v4.0
+           ========================================= */
+        :root {
+            --ease-elastic: cubic-bezier(0.34, 1.3, 0.64, 1);
+            --ease-smooth: cubic-bezier(0.16, 1, 0.3, 1);
+            --duration-fast: 250ms;
+            --duration-normal: 400ms;
+            --radius-bubble: 20px;
+            --radius-panel: 32px;
+            --header-height: 60px;
+            --safe-bottom: env(safe-area-inset-bottom, 20px);
+        }
 
-			body {
-				font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-				background-color: var(--bg-color);
-				color: var(--text-color);
-				height: 100vh;
-				display: flex;
-				justify-content: center;
-				align-items: center;
-			}
+        /* --- Dark Theme --- */
+        [data-theme="dark"] {
+            --bg-deep: #050505;
+            --bg-glass: rgba(18, 18, 20, 0.85);
+            --bg-glass-heavy: rgba(10, 10, 12, 0.96);
+            --color-primary: #dd2476;
+            --color-secondary: #ff512f;
+            --color-text-main: #f0f0f2;
+            --color-text-muted: #888890;
+            --color-border: rgba(255, 255, 255, 0.08);
+            --bubble-bot: rgba(255, 255, 255, 0.08);
+            --shadow-glow: 0 0 20px rgba(221, 36, 118, 0.2);
+        }
 
-			/* Container หลัก ทำเหมือนหน้าจอมือถือ */
-			.app-container {
-				width: 100%;
-				height: 100%;
-				max-width: 600px; /* จำกัดความกว้างถ้ารันบนจอคอม */
-				background-color: var(--chat-bg);
-				display: flex;
-				flex-direction: column;
-				position: relative;
-				box-shadow: var(--shadow-md);
-			}
+        /* --- Light Theme --- */
+        [data-theme="light"] {
+            --bg-deep: #f2f2f7;
+            --bg-glass: rgba(255, 255, 255, 0.85);
+            --bg-glass-heavy: rgba(255, 255, 255, 0.98);
+            --color-primary: #007AFF;
+            --color-secondary: #5856D6;
+            --color-text-main: #1c1c1e;
+            --color-text-muted: #8e8e93;
+            --color-border: rgba(0, 0, 0, 0.1);
+            --bubble-bot: #ffffff;
+            --shadow-glow: 0 4px 15px rgba(0, 122, 255, 0.15);
+        }
 
-			/* ส่วนหัว Header */
-			header {
-				padding: 1rem;
-				background: rgba(255, 255, 255, 0.9);
-				backdrop-filter: blur(10px);
-				border-bottom: 1px solid rgba(0,0,0,0.05);
-				display: flex;
-				align-items: center;
-				justify-content: center;
-				position: sticky;
-				top: 0;
-				z-index: 10;
-			}
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+        
+        body {
+            height: 100%; overflow: hidden; margin: 0;
+            background-color: var(--bg-deep);
+            font-family: 'Sarabun', sans-serif;
+            color: var(--color-text-main);
+            transition: background-color 0.4s ease;
+        }
 
-			header h1 {
-				font-size: 1.1rem;
-				font-weight: 600;
-				color: var(--text-color);
-			}
+        /* --- Header --- */
+        .app-header {
+            position: absolute; top: 0; left: 0; right: 0; height: var(--header-height);
+            display: flex; align-items: center; justify-content: space-between; padding: 0 20px;
+            z-index: 50; pointer-events: none;
+            background: linear-gradient(to bottom, var(--bg-deep), transparent);
+        }
+        .brand-pill {
+            pointer-events: auto; display: flex; align-items: center; gap: 10px;
+            background: var(--bg-glass); padding: 6px 14px; border-radius: 100px;
+            border: 1px solid var(--color-border); backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
 
-			header .status-dot {
-				width: 8px;
-				height: 8px;
-				background-color: #31a24c;
-				border-radius: 50%;
-				margin-right: 8px;
-				display: inline-block;
-			}
+        /* --- Chat --- */
+        #chatContainer {
+            position: absolute; inset: 0;
+            padding: calc(var(--header-height) + 10px) 16px 160px 16px;
+            overflow-y: auto; overflow-x: hidden;
+            display: flex; flex-direction: column; gap: 16px;
+            scroll-behavior: smooth; -webkit-overflow-scrolling: touch;
+        }
 
-			/* พื้นที่แชท */
-			.chat-container {
-				flex: 1;
-				display: flex;
-				flex-direction: column;
-				overflow: hidden;
-				position: relative;
-			}
+        .message {
+            max-width: 86%; padding: 14px 18px; font-size: 1rem;
+            position: relative; word-wrap: break-word;
+            border-radius: var(--radius-bubble);
+            animation: popIn 0.4s var(--ease-elastic) forwards;
+            opacity: 0; transform: translateY(20px) scale(0.95);
+            line-height: 1.5;
+            
+            /* Disable native interactions for better Custom Long Press */
+            user-select: none; -webkit-user-select: none;
+            touch-action: pan-y; /* Allow vertical scroll only */
+            cursor: pointer;
+        }
 
-			.chat-messages {
-				flex: 1;
-				overflow-y: auto;
-				padding: 1rem;
-				display: flex;
-				flex-direction: column;
-				gap: 0.5rem;
-				scroll-behavior: smooth;
-			}
+        @keyframes popIn { to { opacity: 1; transform: translateY(0) scale(1); } }
 
-			/* สไตล์ข้อความ */
-			.message {
-				max-width: 75%;
-				padding: 0.75rem 1rem;
-				border-radius: 1.25rem;
-				font-size: 0.95rem;
-				line-height: 1.4;
-				position: relative;
-				word-wrap: break-word;
-				animation: fadeIn 0.2s ease-out;
-			}
+        .user-message {
+            align-self: flex-end; color: white;
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            border-bottom-right-radius: 4px;
+            box-shadow: var(--shadow-glow);
+        }
 
-			@keyframes fadeIn {
-				from { opacity: 0; transform: translateY(10px); }
-				to { opacity: 1; transform: translateY(0); }
-			}
+        .bot-message {
+            align-self: flex-start; color: var(--color-text-main);
+            background: var(--bubble-bot);
+            border: 1px solid var(--color-border);
+            border-bottom-left-radius: 4px;
+            backdrop-filter: blur(5px);
+        }
+        
+        .bot-message p { margin: 0; }
+        
+        /* Markdown Styles */
+        .bot-message pre { background: rgba(0,0,0,0.3); padding: 10px; border-radius: 10px; overflow-x: auto; margin: 10px 0; }
+        .bot-message code { font-family: monospace; color: #ff7eb6; background: rgba(0,0,0,0.2); padding: 2px 4px; border-radius: 4px; }
+        .bot-message pre code { background: transparent; padding: 0; color: #e0e0e0; }
 
-			.message p {
-				margin: 0;
-			}
+        /* --- Input Dock --- */
+        .input-container {
+            position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+            background: var(--bg-glass-heavy);
+            backdrop-filter: blur(30px) saturate(180%);
+            border-top: 1px solid var(--color-border);
+            padding: 12px 16px calc(12px + var(--safe-bottom));
+            transition: transform 0.3s var(--ease-smooth);
+        }
 
-			/* ข้อความเรา (User) - ชิดขวา สีน้ำเงิน */
-			.user-message {
-				align-self: flex-end;
-				background: var(--user-msg-bg);
-				background: var(--primary-gradient);
-				color: var(--user-msg-text);
-				border-bottom-right-radius: 0.25rem;
-			}
+        .input-wrapper {
+            display: flex; align-items: center; gap: 8px;
+            background: rgba(127, 127, 127, 0.1);
+            border: 1px solid var(--color-border);
+            border-radius: 30px; padding: 6px 6px 6px 16px;
+            transition: 0.3s;
+        }
+        .input-wrapper:focus-within { border-color: var(--color-primary); box-shadow: 0 0 0 2px rgba(221, 36, 118, 0.2); }
 
-			/* ข้อความ AI - ชิดซ้าย สีเทา */
-			.assistant-message {
-				align-self: flex-start;
-				background-color: var(--assistant-msg-bg);
-				color: var(--assistant-msg-text);
-				border-bottom-left-radius: 0.25rem;
-			}
+        #messageInput { flex: 1; background: transparent; border: none; color: var(--color-text-main); font-size: 1rem; height: 40px; }
+        
+        .action-btn {
+            width: 42px; height: 42px; border-radius: 50%; border: none; background: transparent;
+            color: var(--color-text-muted); font-size: 1.1rem; display: flex; align-items: center; justify-content: center;
+            transition: 0.2s;
+        }
+        .action-btn:active { transform: scale(0.9); background: rgba(127,127,127,0.1); }
+        #sendButton { background: var(--color-primary); color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
 
-			/* Typing Indicator */
-			.typing-indicator {
-				display: none;
-				align-self: flex-start;
-				background-color: var(--assistant-msg-bg);
-				padding: 0.5rem 1rem;
-				border-radius: 1.25rem;
-				border-bottom-left-radius: 0.25rem;
-				margin-bottom: 0.5rem;
-				font-size: 0.8rem;
-				color: var(--text-secondary);
-				margin-left: 1rem;
-			}
-			
-			.typing-indicator.visible {
-				display: block;
-			}
+        /* --- Menus (Grid) --- */
+        .menu-grid, .commands-grid {
+            position: absolute; bottom: 100%; left: 0; right: 0;
+            background: var(--bg-glass-heavy); backdrop-filter: blur(40px);
+            border-radius: var(--radius-panel) var(--radius-panel) 0 0;
+            border-top: 1px solid var(--color-border);
+            padding: 20px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+            
+            opacity: 0; transform: translateY(40px) scale(0.95); visibility: hidden; pointer-events: none;
+            transition: all 0.4s var(--ease-elastic);
+            z-index: 90; box-shadow: 0 -10px 40px rgba(0,0,0,0.3);
+        }
+        .menu-grid.open, .commands-grid.open { opacity: 1; transform: translateY(0) scale(1); visibility: visible; pointer-events: auto; }
 
-			.dots {
-				display: inline-block;
-			}
-			.dots span {
-				animation: blink 1.4s infinite both;
-				height: 5px;
-				width: 5px;
-				background-color: #888;
-				border-radius: 50%;
-				display: inline-block;
-				margin: 0 1px;
-			}
-			.dots span:nth-child(2) { animation-delay: 0.2s; }
-			.dots span:nth-child(3) { animation-delay: 0.4s; }
+        .grid-item {
+            display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 12px 6px;
+            background: rgba(127,127,127,0.05); border-radius: 16px; border: 1px solid var(--color-border);
+            color: var(--color-text-main); transition: 0.2s; font-size: 0.75rem;
+        }
+        .grid-item:active { transform: scale(0.95); background: rgba(127,127,127,0.1); }
+        .grid-item i { font-size: 1.5rem; color: var(--color-primary); }
 
-			@keyframes blink {
-				0% { opacity: 0.2; }
-				20% { opacity: 1; }
-				100% { opacity: 0.2; }
-			}
+        /* --- Modals & Panels --- */
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 150;
+            opacity: 0; visibility: hidden; transition: 0.3s;
+        }
+        .modal-overlay.open { opacity: 1; visibility: visible; }
 
-			/* ช่องพิมพ์ข้อความด้านล่าง */
-			.input-area {
-				padding: 0.75rem;
-				background-color: var(--chat-bg);
-				border-top: 1px solid rgba(0,0,0,0.05);
-				display: flex;
-				align-items: flex-end;
-				gap: 0.5rem;
-			}
+        .modal {
+            position: fixed; bottom: 0; left: 0; right: 0; height: 85vh;
+            background: var(--bg-deep); border-radius: var(--radius-panel) var(--radius-panel) 0 0;
+            display: flex; flex-direction: column; z-index: 200;
+            transform: translateY(100%); transition: transform 0.5s var(--ease-elastic);
+            box-shadow: 0 -10px 50px rgba(0,0,0,0.5);
+        }
+        .modal.open { transform: translateY(0); }
 
-			.input-wrapper {
-				flex: 1;
-				background-color: var(--input-bg);
-				border-radius: 1.5rem;
-				padding: 0.5rem 1rem;
-				display: flex;
-				align-items: center;
-			}
+        .panel-header {
+            display: flex; justify-content: space-between; align-items: center; padding: 16px 24px;
+            border-bottom: 1px solid var(--color-border);
+        }
+        .panel-close-btn { width: 32px; height: 32px; border-radius: 50%; background: rgba(127,127,127,0.1); border:none; color: var(--color-text-main); }
+        .modal-content { flex: 1; overflow-y: auto; padding: 20px; }
 
-			#user-input {
-				width: 100%;
-				border: none;
-				background: transparent;
-				font-family: inherit;
-				font-size: 0.95rem;
-				resize: none;
-				outline: none;
-				max-height: 100px;
-				padding: 4px 0;
-				line-height: 1.4;
-			}
+        /* --- Laser Header (Article/Search) --- */
+        @keyframes laserFlow { 0% { background-position: 0% 50%; } 100% { background-position: 200% 50%; } }
+        
+        #articleModal { border-radius: 30px 30px 0 0; background: #000; overflow: hidden; }
+        
+        #articleModal .panel-header {
+            position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+            width: 80px; height: 6px; padding: 0; border: none;
+            border-radius: 10px;
+            background: linear-gradient(90deg, #ff0080, #7928ca, #ff0080);
+            background-size: 200% auto;
+            animation: laserFlow 3s linear infinite;
+            box-shadow: 0 0 15px rgba(255, 0, 128, 0.5);
+            z-index: 10; pointer-events: none;
+        }
+        #articleModal .panel-header * { display: none; }
+        #articleModal .modal-content { padding: 0; height: 100%; position: relative; }
+        #articleIframe { width: 100%; height: 100%; border: none; background: #fff; border-radius: 30px 30px 0 0; }
 
-			#send-button {
-				background: none;
-				border: none;
-				color: var(--primary-color);
-				font-weight: 600;
-				cursor: pointer;
-				padding: 0.5rem 1rem;
-				font-size: 1rem;
-				transition: opacity 0.2s;
-			}
+        /* --- Toast --- */
+        #toastNotification {
+            position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(20px);
+            background: rgba(20,20,20,0.95); color: white; padding: 12px 24px; border-radius: 50px;
+            opacity: 0; transition: 0.4s var(--ease-elastic); pointer-events: none; z-index: 999;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3); font-size: 0.9rem;
+        }
+        #toastNotification.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-			#send-button:disabled {
-				color: var(--text-secondary);
-				opacity: 0.5;
-				cursor: default;
-			}
-			
-			/* Footer เล็กๆ */
-			footer {
-				text-align: center;
-				padding: 0.5rem;
-				font-size: 0.7rem;
-				color: #aaa;
-				background-color: var(--bg-color);
-			}
-			
-			@media (min-width: 600px) {
-				.app-container {
-					border-radius: 16px;
-					height: 90vh;
-				}
-				footer {
-					background: transparent;
-					position: absolute;
-					bottom: -30px;
-					width: 100%;
-					color: #666;
-				}
-			}
-		</style>
-	</head>
-	<body>
-		<div class="app-container">
-			<header>
-				<span class="status-dot"></span>
-				<h1>Partners AI</h1>
-			</header>
+        .typing-indicator { display: none; gap: 5px; padding: 15px; margin-left: 16px; }
+        .dot { width: 8px; height: 8px; background: var(--color-text-muted); border-radius: 50%; animation: bounce 1.4s infinite; }
+        .dot:nth-child(2) { animation-delay: 0.2s; } .dot:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+    </style>
+</head>
+<body>
 
-			<div class="chat-container">
-				<div id="chat-messages" class="chat-messages">
-					<div class="message assistant-message">
-						<p>สวัสดีครับ! มีอะไรให้ผมช่วยไหมครับ?</p>
-					</div>
-				</div>
+    <header class="app-header">
+        <div class="brand-pill">
+            <span style="font-weight:700;font-size:0.9rem;">Partners AI</span>
+        </div>
+    </header>
 
-				<div class="typing-indicator" id="typing-indicator">
-					<div class="dots"><span></span><span></span><span></span></div>
-				</div>
-			</div>
+    <div id="chatContainer">
+        <div class="typing-indicator" id="typingIndicator">
+            <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+        </div>
+    </div>
 
-			<div class="input-area">
-				<div class="input-wrapper">
-					<textarea
-						id="user-input"
-						placeholder="พิมพ์ข้อความ..."
-						rows="1"
-						autofocus
-					></textarea>
-				</div>
-				<button id="send-button">ส่ง</button>
-			</div>
-		</div>
-		
-		<footer>
-			Powered by Cloudflare Workers AI
-		</footer>
+    <div class="modal-overlay" id="modalOverlay"></div>
+    <div id="toastNotification">แจ้งเตือน</div>
 
-		<script src="chat.js"></script>
-	</body>
+    <div class="modal" id="articleModal">
+        <div class="panel-header"></div> <div class="modal-content"><iframe id="articleIframe"></iframe></div>
+    </div>
+
+    <div class="modal" id="historyModal">
+        <div class="panel-header">
+            <span>ประวัติ</span>
+            <button class="panel-close-btn" id="closeHistoryModal"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-content"><ul id="historyList" style="list-style:none;padding:0"></ul></div>
+    </div>
+
+    <div class="input-container">
+        <div class="menu-grid" id="menuGrid">
+            <div class="grid-item" id="historyButton"><i class="fas fa-history"></i><span>ประวัติ</span></div>
+            <div class="grid-item" id="themeButton"><i class="fas fa-adjust"></i><span>ธีม</span></div>
+            <div class="grid-item" id="articleButton"><i class="fas fa-globe"></i><span>Partners</span></div>
+            <div class="grid-item" id="clearChatButton"><i class="fas fa-trash" style="color:#ff3b30"></i><span>ล้างแชท</span></div>
+        </div>
+
+        <div class="commands-grid" id="commandsGrid">
+            </div>
+
+        <div class="menu-grid" id="messageContextGrid">
+            <div class="grid-item" id="replyBtn"><i class="fas fa-reply"></i><span>ตอบกลับ</span></div>
+            <div class="grid-item" id="searchBtn"><i class="fas fa-search"></i><span>ค้นหา</span></div>
+        </div>
+
+        <div class="input-wrapper">
+            <button class="action-btn" id="menuButton"><i class="fas fa-bars"></i></button>
+            <input type="text" id="messageInput" placeholder="พิมพ์ข้อความ..." autocomplete="off">
+            <div style="display:flex;gap:4px;">
+                <button class="action-btn" id="sendButton" style="display:none;background:var(--color-primary);color:white;"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const getEl = id => document.getElementById(id);
+        
+        // --- Element Selectors ---
+        const els = {
+            chatContainer: getEl('chatContainer'),
+            input: getEl('messageInput'),
+            sendBtn: getEl('sendButton'),
+            typing: getEl('typingIndicator'),
+            menus: {
+                main: getEl('menuGrid'),
+                commands: getEl('commandsGrid'),
+                context: getEl('messageContextGrid')
+            },
+            modals: {
+                article: getEl('articleModal'),
+                history: getEl('historyModal')
+            },
+            overlay: getEl('modalOverlay'),
+            toast: getEl('toastNotification')
+        };
+
+        // --- Chat State (Compatible with Cloudflare Worker Template) ---
+        // chatHistory stores objects like { role: 'user' | 'assistant', content: '...' }
+        let chatHistory = JSON.parse(localStorage.getItem('aiCurrentConversation')) || [];
+        let isProcessing = false;
+
+        // --- 1. THEME SYSTEM ---
+        function initTheme() {
+            const saved = localStorage.getItem('app_theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', saved);
+        }
+        initTheme();
+        
+        getEl('themeButton').onclick = () => {
+            const current = document.documentElement.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('app_theme', next);
+            closeAllMenus();
+        };
+
+        // --- 2. MESSAGE DISPLAY LOGIC ---
+        let currentLongPressText = "";
+        
+        /**
+         * Adds a message bubble to the UI.
+         * @param {string} text - Message content
+         * @param {boolean} isUser - True if from user, false if from AI
+         * @param {boolean} save - Whether to save to localStorage immediately
+         * @returns {HTMLElement} The created message div (useful for updating streaming content)
+         */
+        function addMessage(text, isUser, save = true) {
+            if(save) {
+                // Map 'model' to 'assistant' to fix legacy data if exists, else use standard
+                const role = isUser ? 'user' : 'assistant';
+                chatHistory.push({ role: role, content: text });
+                
+                // Limit history size to prevent header overflow errors
+                if(chatHistory.length > 20) chatHistory.shift();
+                
+                localStorage.setItem('aiCurrentConversation', JSON.stringify(chatHistory));
+            }
+
+            const div = document.createElement('div');
+            div.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
+            
+            // Format Content
+            if(!isUser && window.marked) {
+                div.innerHTML = marked.parse(text);
+            } else {
+                div.textContent = text;
+            }
+
+            // --- DeepTouch Long Press ---
+            let pressTimer;
+            div.addEventListener('touchstart', (e) => {
+                div.dataset.scrolling = 'false';
+                pressTimer = setTimeout(() => {
+                    if(div.dataset.scrolling === 'true') return;
+                    if(navigator.vibrate) navigator.vibrate(60);
+                    currentLongPressText = text;
+                    closeAllMenus();
+                    els.menus.context.classList.add('open');
+                }, 350); 
+            }, {passive: true});
+
+            div.addEventListener('touchmove', () => {
+                div.dataset.scrolling = 'true';
+                clearTimeout(pressTimer);
+            });
+            div.addEventListener('touchend', () => clearTimeout(pressTimer));
+            div.addEventListener('contextmenu', e => e.preventDefault());
+
+            els.chatContainer.insertBefore(div, els.typing);
+            els.chatContainer.scrollTop = els.chatContainer.scrollHeight;
+            
+            return div;
+        }
+
+        // --- 3. MODAL & UI LOGIC ---
+        function openModal(modal) {
+            closeAllMenus();
+            els.overlay.classList.add('open');
+            modal.classList.add('open');
+        }
+
+        function closeModal(modal) {
+            modal.classList.remove('open');
+            const anyOpen = document.querySelectorAll('.modal.open').length > 0;
+            if(!anyOpen) els.overlay.classList.remove('open');
+            if(modal === els.modals.article) {
+                setTimeout(() => { getEl('articleIframe').src = 'about:blank'; }, 300);
+            }
+        }
+        
+        els.overlay.addEventListener('click', () => {
+            document.querySelectorAll('.modal.open').forEach(m => closeModal(m));
+            closeAllMenus();
+        });
+
+        document.querySelectorAll('.panel-close-btn').forEach(btn => {
+            btn.onclick = function() { closeModal(this.closest('.modal')); }
+        });
+
+        function openWebPanel(url) {
+            getEl('articleIframe').src = url;
+            openModal(els.modals.article);
+        }
+
+        function closeAllMenus() {
+            Object.values(els.menus).forEach(m => m.classList.remove('open'));
+        }
+
+        function toggleSendBtn(show) {
+            els.sendBtn.style.display = show ? 'flex' : 'none';
+        }
+
+        // --- 4. STREAMING CHAT LOGIC (Connected to Cloudflare Worker) ---
+        async function getBotResponse(msg) {
+            if(!msg || isProcessing) return;
+            
+            isProcessing = true;
+            els.input.disabled = true;
+            
+            // Add User Message
+            addMessage(msg, true);
+            els.input.value = '';
+            toggleSendBtn(false);
+            
+            // Show Typing Indicator
+            els.typing.style.display = 'flex';
+            els.chatContainer.scrollTop = els.chatContainer.scrollHeight;
+
+            try {
+                // Create a placeholder bubble for the AI response
+                const assistantMessageEl = addMessage("", false, false); // Don't save empty yet
+                let responseText = "";
+
+                // Prepare Payload: Ensure roles are strictly 'user' or 'assistant'
+                // Filter out any legacy 'model' roles or system prompts if needed
+                const cleanHistory = chatHistory.map(m => ({
+                    role: (m.role === 'model' || m.role === 'assistant') ? 'assistant' : 'user',
+                    content: m.content || m.text // Handle legacy 'text' field
+                }));
+
+                // Send request to Cloudflare Worker
+                const response = await fetch("/api/chat", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ messages: cleanHistory }),
+                });
+
+                if (!response.ok) throw new Error("Network response was not ok");
+
+                // Process Streaming Response
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    const chunk = decoder.decode(value, { stream: true });
+                    const lines = chunk.split("\n");
+
+                    for (const line of lines) {
+                        if (!line.trim()) continue;
+                        try {
+                            // Parse SSE format (data: {...} or just {...})
+                            const jsonStr = line.replace(/^data: /, '').trim();
+                            if (jsonStr === '[DONE]') break;
+                            
+                            const jsonData = JSON.parse(jsonStr);
+                            if (jsonData.response) {
+                                responseText += jsonData.response;
+                                // Update bubble content in real-time
+                                assistantMessageEl.innerHTML = marked.parse(responseText);
+                                els.chatContainer.scrollTop = els.chatContainer.scrollHeight;
+                            }
+                        } catch (e) {
+                            console.error("Error parsing JSON chunk", e);
+                        }
+                    }
+                }
+
+                // Final Save
+                chatHistory.push({ role: "assistant", content: responseText });
+                localStorage.setItem('aiCurrentConversation', JSON.stringify(chatHistory));
+
+            } catch(e) {
+                console.error(e);
+                addMessage("เกิดข้อผิดพลาดในการเชื่อมต่อ", false);
+            } finally {
+                els.typing.style.display = 'none';
+                isProcessing = false;
+                els.input.disabled = false;
+                els.input.focus();
+            }
+        }
+
+        // --- 5. EVENT LISTENERS ---
+        
+        // Input Handling
+        els.input.addEventListener('input', (e) => toggleSendBtn(e.target.value.trim().length > 0));
+        els.input.addEventListener('keydown', (e) => {
+            if(e.key === 'Enter') getBotResponse(els.input.value.trim());
+        });
+        els.sendBtn.onclick = () => getBotResponse(els.input.value.trim());
+
+        // Menus Toggles
+        getEl('menuButton').onclick = (e) => { e.stopPropagation(); els.menus.main.classList.toggle('open'); };
+        document.body.onclick = (e) => {
+            if(!e.target.closest('.menu-grid') && !e.target.closest('.action-btn')) {
+                closeAllMenus();
+            }
+        };
+
+        // Context Menu Actions
+        getEl('replyBtn').onclick = () => {
+            els.input.value = `"${currentLongPressText.substring(0,15)}..." : `;
+            closeAllMenus();
+        };
+        getEl('searchBtn').onclick = () => {
+            openWebPanel(`https://www.google.com/search?q=${encodeURIComponent(currentLongPressText)}&sca_esv=f3c15013da1a5a7a&igu=1&udm=50&fbs=AIIjpHybcQ6MmIDvEV2b8YqNafkxcNE5htxyLcbq37NoxRa53X3wTi3q2l0V1ac80tqTFkueZm131aIr1DiLnVzu6KJ1GCQhPsqZF5u_4QrKK27zZg7amwkB6UK-VaTzqwUPkTe1hm2t3jfD6QYoGV-M3y8s4W7h9pEPgpSISl8bMuxQ61iJY-0mhaTZ-vnqWr1NCvr2GzebPdCf9POSb_HW9p8W0flQHReaTOz8YQAcGP8kon1Ju3_68F08qoAnd_Miyfee5Nbk6COIQFtNIwLQmjOOedRZpiwIe_v3UWWIOM1xW4FYs1ops54NaAHCVlTYrBXok7IG&aep=1&ntc=1&sa=X&ved=2ahUKEwjatsD4yq6RAxWfrlYBHTrOC4AQ2J8OegQIDRAE&biw=411&bih=543&dpr=1.75 `);
+        };
+
+        // Main Menu Actions
+        getEl('historyButton').onclick = () => {
+             const list = getEl('historyList');
+             if(chatHistory.length === 0) {
+                 list.innerHTML = `<li style="padding:10px;opacity:0.7;">ไม่มีประวัติเก่า</li>`;
+             } else {
+                 list.innerHTML = chatHistory.map((m, i) => 
+                    `<li style="padding:10px;border-bottom:1px solid #333;font-size:0.8rem;">
+                        <strong>${m.role}:</strong> ${m.content ? m.content.substring(0,30) : '...'}...
+                    </li>`
+                 ).join('');
+             }
+             openModal(els.modals.history);
+        };
+        
+        getEl('articleButton').onclick = () => openWebPanel('https://www.google.com/search?q=Cloudflare+Workers+AI');
+        
+        getEl('clearChatButton').onclick = () => {
+            if(confirm('ล้างแชททั้งหมด?')) {
+                localStorage.removeItem('aiCurrentConversation');
+                location.reload();
+            }
+        };
+
+        // Initial Load: Display History
+        if (chatHistory.length > 0) {
+            chatHistory.forEach(m => {
+                // Support legacy format 'text' and new format 'content'
+                addMessage(m.content || m.text, (m.role === 'user'), false);
+            });
+        } else {
+            addMessage(`สวัสดีครับ! มีอะไรให้ผมช่วยไหมครับ?`, false, false);
+        }
+
+    });
+    </script>
+</body>
 </html>
