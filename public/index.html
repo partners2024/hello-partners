@@ -286,7 +286,12 @@
             <div class="grid-item" id="replyBtn"><i class="fas fa-reply"></i><span>ตอบกลับ</span></div>
             <div class="grid-item" id="searchBtn"><i class="fas fa-search"></i><span>ค้นหา</span></div>
         </div>
-
+<div id="uiMenuBox" class="uiMenu">
+    <button onclick="sendQuick('ตารางแข่งซีเกมส์วันนี้')">ตารางแข่ง</button>
+    <button onclick="sendQuick('ราคาทองวันนี้')">ราคาทอง</button>
+    <button onclick="sendQuick('ช่วยแนะนำหน่อย')">ถาม AI</button>
+    <button onclick="hideMainMenu()">ปิด</button>
+</div>
         <div class="input-wrapper">
             <button class="action-btn" id="menuButton"><i class="fas fa-bars"></i></button>
             <input type="text" id="messageInput" placeholder="พิมพ์ข้อความ..." autocomplete="off">
