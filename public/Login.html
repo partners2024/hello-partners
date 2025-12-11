@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>Hello Partners | Pernartd™ Ecosystem</title>
+  <meta name="description" content="Pernartd™ AI - Intelligent Partner System" />
+  <meta name="theme-color" content="#0a0a0a" />
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;600;800&family=Sarabun:wght@300;400;500;700&display=swap" rel="stylesheet">
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/localforage/1.10.0/localforage.min.js"></script>
+
+  <style>
+    /* =========================================
+       CORE ENGINE & VARIABLES
+       ========================================= */
+    :root {
+      /* Palette */
+      --c-bg: #050505;
+      --c-glass: rgba(20, 20, 25, 0.75);
+      --c-glass-border: rgba(255, 255, 255, 0.08);
+      --c-primary: #dd2476;
+      --c-secondary: #ff512f;
+      --c-accent: #26c5f3;
+      --c-text-main: #ffffff;
+      --c-text-muted: #9ca3af;
+      
+      /* Gradients */
+      --g-brand: linear-gradient(135deg, var(--c-primary), var(--c-secondary));
+      
+      /* Physics & Dimensions */
+      --ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
+      --ease-elastic: cubic-bezier(0.34, 1.56, 0.64, 1);
+      --panel-radius: 32px;
+      /* เพิ่มระยะห่างด้านล่าง */
+      --safe-area-bottom: calc(env(safe-area-inset-bottom, 20px) + 24px); 
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+    
+    body {
+      margin: 0;
+      background: var(--c-bg);
+      font-family: 'Sarabun', sans-serif;
+      color: var(--c-text-main);
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    /* =========================================
+       LAYER 1: ATMOSPHERIC ENGINE
+       ========================================= */
+    .particle-system { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+    .orb {
+      position: absolute; border-radius: 50%; filter: blur(100px); opacity: 0.4;
+      will-change: transform; animation: orb-float 15s infinite alternate ease-in-out;
+    }
+    .orb-1 { width: 400px; height: 400px; background: var(--c-primary); top: -10%; left: -10%; }
+    .orb-2 { width: 350px; height: 350px; background: var(--c-accent); bottom: -10%; right: -10%; animation-delay: -5s; }
+    .orb-3 { width: 200px; height: 200px; background: var(--c-secondary); top: 40%; left: 40%; filter: blur(80px); opacity: 0.2; }
+
+    @keyframes orb-float { 
+      0% { transform: translate3d(0,0,0) scale(1); } 
+      100% { transform: translate3d(50px, 30px, 0) scale(1.1); } 
+    }
+
+    /* =========================================
+       LAYER 2: LANDING STAGE
+       ========================================= */
+    #landing-stage {
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      padding-bottom: 10vh;
+      transition: transform 0.8s var(--ease-out-expo), opacity 0.6s ease;
+      will-change: transform, opacity;
+    }
+
+    body.panel-open #landing-stage {
+      transform: scale(0.92) translateY(-20px);
+      opacity: 0.4;
+      filter: blur(4px);
+    }
+
+    /* Typography Scaled Up */
+    .brand-headline { text-align: center; margin-bottom: 2rem; position: relative; }
+    .txt-hello {
+      font-family: 'Noto Sans Thai', sans-serif;
+      font-size: clamp(5rem, 18vw, 9rem); /* Increased Size */
+      font-weight: 900;
+      line-height: 0.85;
+      background: linear-gradient(to right, #fff, #a5a5a5);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      margin: 0; letter-spacing: -0.04em;
+    }
+    .txt-partners {
+      font-family: 'Noto Sans Thai', sans-serif;
+      font-size: clamp(3rem, 10vw, 6rem); /* Increased Size */
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      background: var(--g-brand);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      margin-top: -0.1em;
+    }
+
+    .mascot-wrapper {
+      position: relative; margin-bottom: 2rem;
+      animation: hover-float 4s ease-in-out infinite;
+    }
+    .mascot-img { width: 280px; height: auto; filter: drop-shadow(0 20px 50px rgba(221, 36, 118, 0.3)); }
+    @keyframes hover-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+
+    /* Trigger Button */
+    .trigger-btn {
+      position: relative;
+      background: rgba(255,255,255,0.08);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.15);
+      padding: 18px 40px;
+      border-radius: 100px;
+      color: white;
+      font-size: 1.2rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex; align-items: center; gap: 12px;
+      transition: all 0.4s var(--ease-out-expo);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+    .trigger-btn:hover { transform: translateY(-2px); background: rgba(255,255,255,0.12); box-shadow: 0 20px 40px rgba(221, 36, 118, 0.2); }
+    .trigger-btn:active { transform: scale(0.96); }
+    
+    .loader-dots { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: 6px; opacity: 0; pointer-events: none; }
+    .trigger-btn.loading .loader-dots { opacity: 1; }
+    .trigger-btn.loading #btnLabel, .trigger-btn.loading .btn-state-icon { opacity: 0; }
+    .dot { width: 5px; height: 5px; background: white; border-radius: 50%; animation: dot-pulse 1s infinite; }
+    .dot:nth-child(2) { animation-delay: 0.2s; } .dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes dot-pulse { 0%, 100% { opacity: 0.3; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.2); } }
+
+    /* =========================================
+       LAYER 3: THE PANEL (Onboarding)
+       ========================================= */
+    #backdrop-layer {
+      position: fixed; inset: 0; z-index: 90; display: none;
+    }
+    body.panel-open #backdrop-layer { display: block; }
+
+    #onboarding-panel {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      height: 85vh;
+      background: var(--c-glass);
+      backdrop-filter: blur(40px) saturate(180%);
+      -webkit-backdrop-filter: blur(40px) saturate(180%);
+      border-top-left-radius: var(--panel-radius);
+      border-top-right-radius: var(--panel-radius);
+      border-top: 1px solid var(--c-glass-border);
+      box-shadow: 0 -20px 80px rgba(0,0,0,0.6);
+      z-index: 100;
+      transform: translate3d(0, 105%, 0);
+      transition: transform 0.8s var(--ease-out-expo);
+      display: flex; flex-direction: column;
+      will-change: transform;
+    }
+
+    body.panel-open #onboarding-panel { transform: translate3d(0, 0, 0); }
+
+    .panel-handle { width: 100%; height: 30px; display: flex; justify-content: center; align-items: center; flex-shrink: 0; }
+    .handle-bar { width: 40px; height: 5px; background: rgba(255,255,255,0.2); border-radius: 10px; }
+
+    .flow-container {
+      flex: 1; position: relative; padding: 0 2rem var(--safe-area-bottom);
+      display: flex; flex-direction: column;
+    }
+
+    /* Header inside Panel */
+    .flow-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 1.5rem; opacity: 0; transition: 0.5s 0.3s; transform: translateY(10px);
+    }
+    body.panel-open .flow-header { opacity: 1; transform: translateY(0); }
+    
+    .progress-bar { width: 100px; height: 6px; background: rgba(255,255,255,0.1); border-radius: 100px; overflow: hidden; }
+    .progress-active { width: 0%; height: 100%; background: var(--g-brand); transition: width 0.5s var(--ease-out-expo); }
+    .step-counter { font-size: 0.9rem; font-weight: 600; color: var(--c-text-muted); font-variant-numeric: tabular-nums; }
+
+    /* Card System */
+    .card-stack { position: relative; flex: 1; perspective: 1000px; }
+    .flow-card {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column; justify-content: flex-start; align-items: center;
+      opacity: 0; transform: translate3d(50px, 0, 0) scale(0.95);
+      pointer-events: none; text-align: center;
+      transition: all 0.5s var(--ease-out-expo);
+    }
+    .flow-card.active { opacity: 1; transform: translate3d(0, 0, 0) scale(1); pointer-events: auto; }
+    .flow-card.exit { opacity: 0; transform: translate3d(-50px, 0, 0) scale(0.95); }
+
+    /* Hero Images in Steps */
+    .step-hero-img {
+      height: 180px; width: auto; object-fit: contain;
+      margin-bottom: 1.5rem;
+      filter: drop-shadow(0 10px 30px rgba(0,0,0,0.3));
+      animation: zoom-pulse 4s infinite ease-in-out;
+    }
+    @keyframes zoom-pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.08); }
+    }
+
+    .card-title { font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem; width: 100%; }
+    .card-subtitle { color: var(--c-text-muted); margin-bottom: 2rem; line-height: 1.5; width: 100%; }
+
+    /* Inputs */
+    .modern-input {
+      width: 100%; background: rgba(0,0,0,0.3); border: 1px solid var(--c-glass-border);
+      padding: 1.2rem; border-radius: 16px; color: white; font-size: 1.1rem; text-align: center;
+      transition: all 0.3s;
+    }
+    .modern-input:focus { border-color: var(--c-primary); box-shadow: 0 0 0 4px rgba(221, 36, 118, 0.15); background: rgba(0,0,0,0.5); }
+
+    /* Persona Grid */
+    .persona-selector { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; width: 100%; }
+    .persona-opt {
+      background: rgba(255,255,255,0.03); border: 1px solid var(--c-glass-border);
+      border-radius: 16px; padding: 1.5rem 0.5rem; text-align: center;
+      cursor: pointer; transition: 0.3s var(--ease-elastic);
+    }
+    .persona-opt:hover { background: rgba(255,255,255,0.06); transform: translateY(-3px); }
+    .persona-opt.selected { background: var(--c-primary); border-color: var(--c-primary); box-shadow: 0 8px 25px rgba(221, 36, 118, 0.3); }
+    .p-emoji { font-size: 2rem; display: block; margin-bottom: 8px; }
+    .p-label { font-size: 0.9rem; font-weight: 600; }
+
+    /* Action Deck (Buttons) */
+    .action-deck {
+      display: flex; gap: 1rem; margin-top: auto; 
+      /* เพิ่มระยะห่างจากขอบล่าง */
+      padding-bottom: 1rem;
+      opacity: 0; transition: 0.5s 0.6s; transform: translateY(20px);
+      width: 100%;
+    }
+    body.panel-open .action-deck { opacity: 1; transform: translateY(0); }
+    
+    .btn-nav {
+      height: 56px; border-radius: 14px; border: none; font-size: 1rem; font-weight: 700; cursor: pointer;
+      font-family: 'Sarabun', sans-serif; transition: 0.2s;
+    }
+    .btn-next { flex: 1; background: white; color: black; box-shadow: 0 4px 15px rgba(255,255,255,0.1); }
+    .btn-next:disabled { background: rgba(255,255,255,0.2); color: rgba(255,255,255,0.5); cursor: not-allowed; box-shadow: none; }
+    
+    .btn-back { width: 56px; background: rgba(255,255,255,0.08); color: white; display: grid; place-items: center; border: 1px solid rgba(255,255,255,0.1); }
+    
+    /* Logo Button (Specific for Step 1) */
+    .btn-logo {
+      width: 56px; height: 56px; padding: 0; border-radius: 14px; border: none; overflow: hidden;
+      cursor: pointer; display: none; /* Hidden by default */
+      background: transparent; box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      transition: transform 0.2s;
+    }
+    .btn-logo:active { transform: scale(0.95); }
+    .btn-logo img { width: 100%; height: 100%; object-fit: cover; }
+
+    .highlight { color: var(--c-accent); }
+    .hidden { display: none !important; }
+
+  </style>
+</head>
+<body>
+
+  <script>
+    // 5. ตรวจสอบ LocalStorage ทันทีที่โหลด
+    (function() {
+        const stored = localStorage.getItem('pernartd_profile');
+        if (stored) {
+            window.location.href = 'chat.html';
+        }
+    })();
+  </script>
+
+  <div class="particle-system">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+
+  <main id="landing-stage">
+    <div class="mascot-wrapper">
+      <img src="jump.webp" alt="Mascot" class="mascot-img">
+    </div>
+
+    <div class="brand-headline">
+      <h1 class="txt-hello">Hello!</h1>
+      <h2 class="txt-partners">PARTNERS</h2>
+    </div>
+
+    <button id="triggerBtn" class="trigger-btn">
+      <div class="btn-state-icon">
+        <img src="logo2.jpg" width="34" height="34" style="border-radius: 4px; vertical-align: middle; margin-right: 8px;">
+      </div>
+      <span id="btnLabel">เริ่มต้นใช้งาน</span>
+      <div class="loader-dots">
+        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+      </div>
+    </button>
+  </main>
+
+  <div id="backdrop-layer"></div> <aside id="onboarding-panel">
+    <div class="panel-handle"><div class="handle-bar"></div></div>
+    
+    <div class="flow-container">
+      
+      <header class="flow-header">
+        <span class="step-counter">ขั้นตอน <span id="stepDisplay">1</span>/4</span>
+        <div class="progress-bar"><div class="progress-active" id="progressFill"></div></div>
+      </header>
+
+      <div class="card-stack">
+        
+        <div class="flow-card active" data-step="1">
+          <img src="jump4.webp" class="step-hero-img" alt="Start">
+          <div class="card-title">ชื่อของคุณ?</div>
+          <div class="card-subtitle">ให้ผมเรียกคุณว่าอะไรดีครับ?</div>
+          <input type="text" id="inpNickname" class="modern-input" placeholder="พิมพ์ชื่อเล่น..." autocomplete="off">
+        </div>
+
+        <div class="flow-card" data-step="2">
+          <img src="jump2.webp" class="step-hero-img" alt="Welcome">
+          <div class="card-title">ยินดีที่ได้รู้จักครับ</div>
+          <div class="card-subtitle" style="font-size: 1.2rem;">
+            คุณ <span id="dispNick" class="highlight">...</span>
+          </div>
+        </div>
+
+        <div class="flow-card" data-step="3">
+          <div style="height: 40px;"></div> <div class="card-title">สไตล์การคุย</div>
+          <div class="card-subtitle">ชอบให้ AI ตอบกลับแบบไหน?</div>
+          <div class="persona-selector">
+            <div class="persona-opt" onclick="flow.selectPersona('base', this)">
+              <span class="p-emoji">✨</span><span class="p-label">สุภาพ</span>
+            </div>
+            <div class="persona-opt" onclick="flow.selectPersona('hard', this)">
+              <span class="p-emoji">💬</span><span class="p-label">สั้นๆ</span>
+            </div>
+            <div class="persona-opt" onclick="flow.selectPersona('heavy', this)">
+              <span class="p-emoji">😎</span><span class="p-label">กันเอง</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="flow-card" data-step="4">
+           <img src="jump4.webp" class="step-hero-img" alt="Success">
+          <div class="card-title">เสร็จสิ้น!</div>
+          <div class="card-subtitle">กำลังบันทึกข้อมูลและเข้าสู่ระบบ...</div>
+        </div>
+
+      </div>
+
+      <div class="action-deck">
+        <button class="btn-logo" id="btnlogin">
+            <img src="logo2.jpg" alt="Login">
+        </button>
+        
+        <button class="btn-nav btn-back" id="btnBack">←</button>
+        <button class="btn-nav btn-next" id="btnNext" disabled>ถัดไป</button>
+      </div>
+
+    </div>
+  </aside>
+
+  <script>
+    /**
+     * PERNARTD CORE ENGINE v2.1
+     */
+
+    class AppManager {
+      constructor() {
+        this.dom = {
+          body: document.body,
+          triggerBtn: document.getElementById('triggerBtn'),
+          btnLabel: document.getElementById('btnLabel'),
+          backdrop: document.getElementById('backdrop-layer')
+        };
+        this.init();
+      }
+
+      init() {
+        this.dom.triggerBtn.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent backdrop click
+            this.handleEntry();
+        });
+
+        // 3. แตะพื้นที่นอก Panel เพื่อปิด
+        this.dom.backdrop.addEventListener('click', () => {
+            if(this.dom.body.classList.contains('panel-open')) {
+                this.dom.body.classList.remove('panel-open');
+                // Optional: Reset button state if needed
+            }
+        });
+      }
+
+      async handleEntry() {
+        // Animation Sequence
+        this.dom.triggerBtn.classList.add('loading');
+        this.dom.btnLabel.style.opacity = '0';
+        
+        await new Promise(r => setTimeout(r, 600));
+
+        this.dom.triggerBtn.classList.remove('loading');
+        this.dom.btnLabel.textContent = "ยืนยันเรียบร้อย";
+        this.dom.btnLabel.style.opacity = '1';
+        this.dom.triggerBtn.style.borderColor = "#00C851";
+        this.dom.triggerBtn.style.color = "#00C851";
+
+        setTimeout(() => {
+          this.dom.body.classList.add('panel-open');
+          if (!window.flow) window.flow = new OnboardingFlow();
+        }, 500);
+      }
+    }
+
+    class OnboardingFlow {
+      constructor() {
+        this.state = { step: 1, nickname: '', persona: '' };
+        this.maxSteps = 4;
+        this.els = {
+          cards: document.querySelectorAll('.flow-card'),
+          fill: document.getElementById('progressFill'),
+          stepNum: document.getElementById('stepDisplay'),
+          next: document.getElementById('btnNext'),
+          back: document.getElementById('btnBack'),
+          logoBtn: document.getElementById('btnlogin'), // 1. New Logo Button
+          inpNick: document.getElementById('inpNickname'),
+          dispNick: document.getElementById('dispNick')
+        };
+        
+        this.bindEvents();
+        this.updateUI();
+      }
+
+      bindEvents() {
+        this.els.next.addEventListener('click', () => this.goNext());
+        this.els.back.addEventListener('click', () => this.goBack());
+        
+        // Validation Input
+        this.els.inpNick.addEventListener('input', (e) => {
+          this.state.nickname = e.target.value.trim();
+          this.validate();
+        });
+
+        // Logo button logic (Example: alert or alternate login)
+        this.els.logoBtn.addEventListener('click', () => {
+            console.log("Logo clicked");
+            // Add logic here if needed
+        });
+      }
+
+      selectPersona(type, el) {
+        document.querySelectorAll('.persona-opt').forEach(p => p.classList.remove('selected'));
+        el.classList.add('selected');
+        this.state.persona = type;
+        this.validate();
+        setTimeout(() => this.goNext(), 300);
+      }
+
+      validate() {
+        let valid = false;
+        if (this.state.step === 1) valid = this.state.nickname.length > 0;
+        if (this.state.step === 2) valid = true;
+        if (this.state.step === 3) valid = !!this.state.persona;
+        
+        this.els.next.disabled = !valid;
+        this.els.next.style.opacity = valid ? '1' : '0.5';
+      }
+
+      updateUI() {
+        // Card Slide Physics
+        this.els.cards.forEach(card => {
+          const s = parseInt(card.dataset.step);
+          card.classList.remove('active', 'exit');
+          if (s === this.state.step) card.classList.add('active');
+          if (s < this.state.step) card.classList.add('exit');
+        });
+
+        // Progress Bar
+        const progress = ((this.state.step) / this.maxSteps) * 100;
+        this.els.fill.style.width = `${progress}%`;
+        this.els.stepNum.textContent = this.state.step;
+
+        // Content Logic
+        if (this.state.step === 2) {
+            this.els.dispNick.textContent = this.state.nickname;
+            this.els.next.textContent = "เริ่มเลย";
+        } else if (this.state.step === 4) {
+            this.els.next.style.display = 'none';
+            this.els.back.style.display = 'none';
+            // Auto finalize on step 4
+            setTimeout(() => this.finalize(), 1500); 
+        } else {
+            this.els.next.textContent = "ถัดไป";
+            this.els.next.style.display = 'block';
+            this.els.back.style.display = 'grid'; // grid for center icon
+        }
+
+        // 1. & 6. Button Visibility Logic (Logo vs Back)
+        if (this.state.step === 1) {
+            this.els.logoBtn.style.display = 'block'; // Show Logo
+            this.els.back.style.display = 'none';     // Hide Back
+        } else {
+            this.els.logoBtn.style.display = 'none';  // Hide Logo
+            if(this.state.step < 4) this.els.back.style.display = 'grid'; // Show Back
+        }
+
+        this.validate();
+      }
+
+      goNext() {
+        if (this.state.step < this.maxSteps) {
+          this.state.step++;
+          this.updateUI();
+        }
+      }
+
+      goBack() {
+        if (this.state.step > 1) {
+          this.state.step--;
+          this.updateUI();
+        }
+      }
+
+      async finalize() {
+        // 5. Save Data
+        const profile = {
+            nickname: this.state.nickname,
+            persona: this.state.persona,
+            timestamp: Date.now()
+        };
+        
+        try {
+            // Save to LocalStorage
+            localStorage.setItem('pernartd_profile', JSON.stringify(profile));
+            
+            // Save to LocalForage (Async backup)
+            if(window.localforage) await localforage.setItem('profile', profile);
+            
+            // 4. Redirect to chat.html
+            setTimeout(() => {
+                window.location.href = 'chat.html';
+            }, 1000);
+
+        } catch(e) {
+            console.error("Storage Error", e);
+            // Fallback redirect
+            window.location.href = 'chat.html';
+        }
+      }
+    }
+
+    // Start App
+    document.addEventListener('DOMContentLoaded', () => new AppManager());
+
+  </script>
+</body>
+</html>
